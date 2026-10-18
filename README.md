@@ -96,6 +96,18 @@ select mean(CpuPercent) as CPU from stream where Application = 'container-metric
 select mean(MemUsedMB) as Memory from stream where Application = 'container-metrics' group by Container, time(5m)
 ```
 
+## Container dashboards
+
+[seq-container-dashboards.sh](seq-container-dashboards.sh) creates a Seq dashboard named `Container - <name>` for every running container, copying the charts of the server metrics dashboard. Re-run it after adding containers; existing dashboards are updated, not duplicated. It needs a Seq API key with the *Setup* permission in a file on the server and runs inside the `server-metrics` container:
+
+```
+ssh beheerder@172.16.1.1 'docker cp ~/.seq-dashboard-key server-metrics:/tmp/seq.key &&
+  docker exec -i -e SEQ_ADMIN_KEY_FILE=/tmp/seq.key server-metrics sh -s;
+  docker exec server-metrics rm -f /tmp/seq.key' < seq-container-dashboards.sh
+```
+
+Add `-e DRY_RUN=1` to only print what would be created, or `-e EXCLUDE="docker-proxy server-metrics"` to skip containers.
+
 
 # Publishing
 
