@@ -4,17 +4,35 @@ services:
     image: 301167/server-metrics:latest
     container_name: server-metrics
     restart: unless-stopped
+    depends_on:
+      - docker-proxy
     environment:
       HOST_NAME: docker-server
       SEQ_URL: http://seq:5341
       SEQ_API_KEY: ${SEQ_API_KEY}
       INTERVAL: "60"
       WARN_PERCENT: "90"
+      DOCKER_URL: http://docker-proxy:2375
     volumes:
       - /:/host:ro
     networks:
       - logging
+      - docker-proxy
+
+  # Only server-metrics can reach it; allows read-only container info and stats, nothing else
+  docker-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    container_name: docker-proxy
+    restart: unless-stopped
+    environment:
+      CONTAINERS: "1"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - docker-proxy
 
 networks:
   logging:
     external: true
+  docker-proxy:
+    internal: true

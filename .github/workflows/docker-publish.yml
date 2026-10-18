@@ -69,4 +69,4 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
-          short-description: Sends host CPU, memory and disk usage to Seq every minute
+          short-description: Sends host and container CPU, memory and disk usage to Seq every minute
