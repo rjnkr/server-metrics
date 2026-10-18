@@ -1,0 +1,20 @@
+# Portainer stack: Stacks -> Add stack -> Web editor (or Repository), set SEQ_API_KEY under Environment variables.
+services:
+  server-metrics:
+    image: 301167/server-metrics:latest
+    container_name: server-metrics
+    restart: unless-stopped
+    environment:
+      HOST_NAME: docker-server
+      SEQ_URL: http://seq:5341
+      SEQ_API_KEY: ${SEQ_API_KEY}
+      INTERVAL: "60"
+      WARN_PERCENT: "90"
+    volumes:
+      - /:/host:ro
+    networks:
+      - logging
+
+networks:
+  logging:
+    external: true
