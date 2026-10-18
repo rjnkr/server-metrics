@@ -55,6 +55,7 @@ Every event has `Application = 'server-metrics'` and these properties:
 | Property | Description |
 |---|---|
 | `CpuPercent` | Average CPU usage (all cores) since the previous measurement |
+| `CpuCores`, `CpuUsedCores` | Number of cores (capacity) and cores in use |
 | `Load1`, `Load5`, `Load15` | Load average |
 | `MemUsedPercent`, `MemUsedMB`, `MemTotalMB` | Memory used, excluding page cache |
 | `DiskUsedPercent`, `DiskUsedGB`, `DiskFreeGB`, `DiskTotalGB` | Filesystem of `DISK_PATH` |

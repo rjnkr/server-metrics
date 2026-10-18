@@ -37,6 +37,9 @@ while true; do
     set -- $prev $cur
     prev=$cur
     cpu=$(awk -v t=$(($3 - $1)) -v i=$(($4 - $2)) 'BEGIN{ printf "%.1f", (t > 0 ? (t - i) * 100 / t : 0) }')
+    # Capacity in cores; used cores = share of that capacity
+    cpu_cores=$(grep -c '^processor' /proc/cpuinfo)
+    cpu_used=$(awk -v p="$cpu" -v n="$cpu_cores" 'BEGIN{ printf "%.2f", p * n / 100 }')
 
     # Memory: used = total - available (page cache counts as free)
     set -- $(awk '/^MemTotal:/{t=$2} /^MemAvailable:/{a=$2} END{ printf "%.0f %.0f %.1f", t/1024, (t-a)/1024, (t-a)*100/t }' /proc/meminfo)
@@ -51,7 +54,7 @@ while true; do
     level=$(awk -v c="$cpu" -v m="$mem_pct" -v d="$disk_pct" -v w="$WARN_PERCENT" 'BEGIN{ print ((c > w || m > w || d > w) ? "Warning" : "Information") }')
     ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
-    event="{\"@t\":\"$ts\",\"@l\":\"$level\",\"@mt\":\"{Host}: CPU {CpuPercent}% | Geheugen {MemUsedPercent}% | Disk vrij {DiskFreeGB} GB\",\"Application\":\"server-metrics\",\"Host\":\"$HOST_NAME\",\"CpuPercent\":$cpu,\"Load1\":$load1,\"Load5\":$load5,\"Load15\":$load15,\"MemTotalMB\":$mem_total,\"MemUsedMB\":$mem_used,\"MemUsedPercent\":$mem_pct,\"DiskTotalGB\":$disk_total,\"DiskUsedGB\":$disk_used,\"DiskFreeGB\":$disk_free,\"DiskUsedPercent\":$disk_pct}"
+    event="{\"@t\":\"$ts\",\"@l\":\"$level\",\"@mt\":\"{Host}: CPU {CpuPercent}% | Geheugen {MemUsedPercent}% | Disk vrij {DiskFreeGB} GB\",\"Application\":\"server-metrics\",\"Host\":\"$HOST_NAME\",\"CpuPercent\":$cpu,\"CpuCores\":$cpu_cores,\"CpuUsedCores\":$cpu_used,\"Load1\":$load1,\"Load5\":$load5,\"Load15\":$load15,\"MemTotalMB\":$mem_total,\"MemUsedMB\":$mem_used,\"MemUsedPercent\":$mem_pct,\"DiskTotalGB\":$disk_total,\"DiskUsedGB\":$disk_used,\"DiskFreeGB\":$disk_free,\"DiskUsedPercent\":$disk_pct}"
 
     send "$event" || echo "$ts sending to Seq failed: $event"
 done
